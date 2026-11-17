@@ -5,6 +5,8 @@ Gem::Specification.new do |spec|
   spec.version = Subetha::VERSION
   spec.authors = ["Christopher Sexton"]
   spec.license = "MIT"
+  spec.homepage = "https://github.com/csexton/subetha"
+  spec.metadata["source_code_uri"] = spec.homepage
 
   spec.summary     = "Download, archive, and publish videos across social platforms"
   spec.description = "A command-line utility that keeps a local archive of your videos " \

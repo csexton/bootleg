@@ -19,7 +19,7 @@ Don't Panic.
 Requires Ruby 3.0+.
 
 ```bash
-git clone <this repo> && cd subetha
+git clone https://github.com/csexton/subetha.git && cd subetha
 bin/setup                 # bundle install
 bundle exec exe/subetha --help
 ```
