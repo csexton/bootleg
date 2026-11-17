@@ -1,4 +1,4 @@
-RSpec.describe Archivetok::Downloader do
+RSpec.describe Subetha::Tiktok::Downloader do
   # Two posts from the same day whose captions open with the same words; this
   # pair really collided and cost one of them its file.
   let(:caption)    { "Rules are rules for a reason. This is so serious, not even joking." }
@@ -127,7 +127,7 @@ RSpec.describe Archivetok::Downloader do
     end
 
     let(:audio) do
-      Archivetok::Audio.from({ "id" => "7530081457067920142", "title" => "original sound",
+      Subetha::Tiktok::Audio.from({ "id" => "7530081457067920142", "title" => "original sound",
                                "authorName" => "aubory bugg", "original" => true }, "C. Sexton")
     end
 

@@ -1,4 +1,4 @@
-RSpec.describe Archivetok::Processor do
+RSpec.describe Subetha::Tiktok::Processor do
   subject(:processor) { described_class.new(config) }
 
   # The shape the live endpoint returns today.

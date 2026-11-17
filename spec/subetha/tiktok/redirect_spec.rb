@@ -40,13 +40,13 @@ RSpec.describe "redirect handling" do
     end
   end
 
-  describe Archivetok::Downloader do
+  describe Subetha::Tiktok::Downloader do
     let(:resolver) { described_class.allocate }
 
     it_behaves_like "a Location resolver"
   end
 
-  describe Archivetok::HtmlExtractor do
+  describe Subetha::Tiktok::HtmlExtractor do
     let(:resolver) { described_class.allocate }
 
     it_behaves_like "a Location resolver"

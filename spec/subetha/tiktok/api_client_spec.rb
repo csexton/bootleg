@@ -1,4 +1,4 @@
-RSpec.describe Archivetok::ApiClient do
+RSpec.describe Subetha::Tiktok::ApiClient do
   describe ".payload" do
     it "returns fields served at the top level" do
       expect(described_class.payload('{"status":"success","id":"7"}', "url"))

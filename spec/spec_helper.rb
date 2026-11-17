@@ -3,7 +3,7 @@ $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
 require "fileutils"
 require "stringio"
 require "tmpdir"
-require "archivetok"
+require "subetha"
 
 # Helpers shared by the specs. Everything here stays offline: no spec may make
 # a network request, so the HTTP layer is always stubbed out.
@@ -19,7 +19,7 @@ module SpecHelpers
 
   # An output directory that is removed after the example.
   def output_dir
-    @output_dir ||= Dir.mktmpdir("archivetok-spec")
+    @output_dir ||= Dir.mktmpdir("subetha-spec")
   end
 
   def cleanup_output_dir
@@ -27,7 +27,7 @@ module SpecHelpers
   end
 
   def config(**overrides)
-    Archivetok::Config.new(**DEFAULT_CONFIG, output_dir: output_dir, **overrides)
+    Subetha::Tiktok::Config.new(**DEFAULT_CONFIG, output_dir: output_dir, **overrides)
   end
 
   def files_in_output

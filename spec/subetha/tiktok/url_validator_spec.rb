@@ -1,4 +1,4 @@
-RSpec.describe Archivetok::UrlValidator do
+RSpec.describe Subetha::Tiktok::UrlValidator do
   describe ".valid?" do
     it "accepts a canonical video URL" do
       expect(described_class.valid?("https://www.tiktok.com/@user/video/123")).to be(true)

@@ -1,4 +1,4 @@
-RSpec.describe Archivetok::ProfileExtractor do
+RSpec.describe Subetha::Tiktok::ProfileExtractor do
   let(:profile_url) { "https://www.tiktok.com/@deadrunwoodworks" }
 
   def item(id, created_at)

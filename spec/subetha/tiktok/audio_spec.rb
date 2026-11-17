@@ -1,4 +1,4 @@
-RSpec.describe Archivetok::Audio do
+RSpec.describe Subetha::Tiktok::Audio do
   # Shape taken from a real post (the shellac video) that used someone else's audio.
   let(:borrowed) do
     { "id" => "7530081457067920142", "title" => "original sound",
