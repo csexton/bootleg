@@ -1,0 +1,13 @@
+/.bundle/
+/pkg/
+/tmp/
+/coverage/
+/doc/
+/.yardoc/
+/downloads/
+*.gem
+.DS_Store
+.rspec_status
+
+# Local agent instructions
+CLAUDE.md
