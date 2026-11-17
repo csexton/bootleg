@@ -39,13 +39,19 @@ Commands are grouped by platform:
 subetha PLATFORM COMMAND [options]
 ```
 
-| Platform | Command    | Description                                  |
-|----------|------------|----------------------------------------------|
-| `tiktok` | `download` | Download videos and photo posts with metadata |
-| `tiktok` | `list`     | Print the video URLs on a profile            |
+| Platform  | Command               | Description                                         |
+|-----------|-----------------------|-----------------------------------------------------|
+| `tiktok`  | `download`            | Download videos and photo posts with metadata       |
+| `tiktok`  | `list`                | Print the video URLs on a profile                   |
+| `tiktok`  | `index`               | List the posts already downloaded to a directory    |
+| `youtube` | `auth`                | Log in to YouTube                                   |
+| `youtube` | `schedule`            | Build an upload batch from downloaded posts         |
+| `youtube` | `upload`              | Upload and schedule a batch                         |
+| `youtube` | `update-descriptions` | Push edited descriptions to already-uploaded videos |
+| `youtube` | `shorts`              | List the titles of a channel's newest Shorts        |
 
-More platforms (YouTube uploads first, then Instagram and others) will follow the
-same shape.
+Run `subetha PLATFORM --help` for each platform's options. More platforms
+(Instagram and others) will follow the same shape.
 
 ## TikTok
 
@@ -73,6 +79,9 @@ subetha tiktok list --pages 3 https://www.tiktok.com/@someuser
 
 # Archive a whole profile
 subetha tiktok list --pages 10 https://www.tiktok.com/@someuser | xargs subetha tiktok download
+
+# What's already downloaded: "date | video id | caption", newest first
+subetha tiktok index ~/Videos/tiktok
 ```
 
 The output directory is created automatically if it doesn't exist.
@@ -141,6 +150,116 @@ With `--json`:
 }
 ```
 
+## YouTube
+
+Uploads videos to YouTube and schedules them to publish at set times, through
+the YouTube Data API. Built for cross-posting downloaded TikToks as Shorts, but
+any schedule of videos works.
+
+### Setup
+
+1. In [Google Cloud Console](https://console.cloud.google.com/), create a
+   project and enable **YouTube Data API v3**.
+2. Under OAuth consent screen, set the audience to **External** and add your
+   Google account as a test user. ("Internal" only works for Workspace
+   accounts in the same organization.)
+3. Create an OAuth client ID of type **Desktop app**, download its JSON, and
+   save it as `~/.config/subetha/youtube/client_secrets.json` (or point
+   `youtube.client_secrets` at it).
+4. Log in with the account that owns the channel:
+
+   ```bash
+   subetha youtube auth
+   ```
+
+   The token is saved to `~/.config/subetha/youtube/token.json`. While the
+   OAuth app is in *Testing* mode Google expires the login after 7 days; when
+   commands say the login expired, run `subetha youtube auth` again.
+
+### A batch
+
+A batch is a directory holding a `schedule.csv` and a `videos/` folder. After
+uploading, it also holds `uploads.json` (which rows are uploaded, as which
+video) and `upload.log`. Keep each batch in its own directory.
+
+**1. Pick the posts.** Write a picks file listing downloaded posts in the order
+to publish, with the YouTube title for each:
+
+```
+# path to the download (any extension, or none) | YouTube title
+~/Videos/tiktok/someuser-2026-11-07-inlay-dovetails-pt-1-this-is-the-part | Inlay Dovetails Pt. 1
+~/Videos/tiktok/someuser-2026-11-08-inlay-dovetails-pt-2-cleaning-up      | Inlay Dovetails Pt. 2
+```
+
+`subetha tiktok index DIR` and `subetha youtube shorts @handle` help find what's
+on TikTok but not yet on YouTube.
+
+**2. Build the schedule**, one video per day starting on `--start`:
+
+```bash
+subetha youtube schedule picks.txt --start 2026-12-01 --time 19:00 --dir batches/2026-12
+```
+
+This copies each video into `batches/2026-12/videos/` and writes
+`schedule.csv`. Each row gets the full caption as the description and the
+caption's hashtags (or `default_tags`) plus `shorts` as tags, and is private,
+scheduled, and not made for kids. If the sidecar names someone else's sound, a
+credit line is added to the end of the description:
+
+```
+Original sound by Steven K. (TikTok)
+"Song Name" by Some Band (TikTok)
+```
+
+Your own sounds get no credit line. Sidecars downloaded before audio was
+recorded have no `Audio:` line, so check those by hand. Review and edit the CSV
+before uploading.
+
+**3. Upload:**
+
+```bash
+subetha youtube upload batches/2026-12 --dry-run   # check every row, upload nothing
+subetha youtube upload batches/2026-12
+```
+
+Videos already in `uploads.json` are skipped, so re-running is safe. Uploads
+are spaced out (`--delay`, default 45s). The API allows only a few uploads per
+day; if the quota runs out the batch stops, and you re-run it after the quota
+resets at midnight Pacific. Every video must be uploaded before its publish
+time.
+
+**4. Fixing descriptions later.** Edit `schedule.csv`, then:
+
+```bash
+subetha youtube update-descriptions batches/2026-12 --dry-run
+subetha youtube update-descriptions batches/2026-12
+```
+
+Only the description changes; title, tags and schedule are left alone.
+
+### Schedule format
+
+`schedule.csv` uses the same columns as
+[youtube-shorts-scheduler](https://github.com/padderzahoor/youtube-shorts-scheduler),
+so its schedule files work as they are (pass `--video-dir` if the videos aren't
+in a `videos/` folder beside the CSV):
+
+```csv
+video_filename,title,description,tags,publish_date,publish_time,privacy_status,category_id,made_for_kids
+01-inlay.mp4,Inlay Dovetails Pt. 1,"Caption #woodworking","woodworking,shorts",2026-12-01,19:00,private,26,false
+```
+
+`publish_date`/`publish_time` are in `youtube.timezone` (default: the system's
+zone). Scheduled videos must be `private`; YouTube makes them public at the
+publish time. Leave `publish_date` empty to upload without scheduling.
+
+### Notes
+
+- Right after uploading, a Short can show under "Videos" while it processes.
+  It moves to Shorts once processing finishes (vertical and 3 minutes or less).
+- Unaudited API projects can have uploads locked to private. If Studio shows a
+  lock notice, set the schedule by hand in Studio.
+
 ## Configuration
 
 Defaults live in a YAML file, with one top-level key per platform. The file in
@@ -161,6 +280,16 @@ tiktok:
   filename_date: true
   filename_slug: true
   filename_id: false
+
+youtube:
+  timezone: America/New_York        # default: the system's zone
+  publish_time: "19:00"             # default for `schedule --time`
+  category_id: "26"                 # Howto & Style (default 22, People & Blogs)
+  default_tags: [woodworking, handtools]  # used when a caption has no hashtags
+  delay: 45                         # seconds between uploads
+  handle: "@someuser"               # default channel for `youtube shorts`
+  # client_secrets: ~/.config/subetha/youtube/client_secrets.json
+  # token_path: ~/.config/subetha/youtube/token.json
 ```
 
 ## Development
@@ -179,6 +308,11 @@ The TikTok downloader began as [archivetok](https://github.com/csexton/archiveto
 a Ruby port of [tiktok-downloader-console](https://github.com/RehanDias/tiktok-downloader-console)
 by [rehandiazz](https://github.com/RehanDias), which provides the original Node.js
 implementation and the fallback API endpoint.
+
+The YouTube uploader is a Ruby port of
+[youtube-shorts-scheduler](https://github.com/padderzahoor/youtube-shorts-scheduler)
+by [Padder Zahoor](https://github.com/padderzahoor), including its CSV schedule
+format.
 
 ## License
 

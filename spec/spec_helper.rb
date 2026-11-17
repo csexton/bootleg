@@ -54,9 +54,37 @@ module SpecHelpers
   end
 end
 
+# Stands in for Youtube::Http: answers requests from a queue of responses
+# and records what was asked.
+class FakeHttp
+  Request = Struct.new(:method, :url, :headers, :body)
+
+  attr_reader :requests
+
+  def initialize(*responses)
+    @responses = responses
+    @requests  = []
+  end
+
+  def request(method, url, headers: {}, body: nil)
+    @requests << Request.new(method, url, headers, body)
+    response = @responses.shift or raise "FakeHttp: unexpected #{method.upcase} #{url}"
+    raise response if response.is_a?(Exception)
+
+    response
+  end
+end
+
+def http_response(code, body = "", headers = {})
+  body = JSON.generate(body) unless body.is_a?(String)
+  Subetha::Youtube::Response.new(code, headers.transform_keys(&:downcase), body)
+end
+
 RSpec.configure do |config|
   config.include SpecHelpers
   config.after { cleanup_output_dir }
+  # Never read the real ~/.subetha.yml.
+  config.before { allow(Subetha::ConfigFile).to receive(:candidates).and_return([]) }
 
   config.around do |example|
     real_stdout = $stdout

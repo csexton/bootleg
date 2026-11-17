@@ -21,5 +21,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "colorize"
+  spec.add_dependency "csv"
   spec.add_dependency "nokogiri"
+  spec.add_dependency "tzinfo", "~> 2.0"
 end

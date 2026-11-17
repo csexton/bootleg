@@ -5,22 +5,30 @@ module Subetha
   # to that platform's CLI; each platform CLI returns an exit status.
   module CLI
     PLATFORMS = {
-      "tiktok" => -> { Tiktok::CLI }
+      "tiktok"  => -> { Tiktok::CLI },
+      "youtube" => -> { Youtube::CLI }
     }.freeze
 
-    USAGE = <<~USAGE.freeze
-      Usage: subetha PLATFORM COMMAND [options]
+USAGE = <<~USAGE.freeze
+  Usage: subetha PLATFORM COMMAND [options]
 
-      Platforms:
-          tiktok      download    Download videos and photo posts
-                      list        List the video URLs on a profile
+  Platforms:
+      tiktok      download    Download videos and photo posts
+                  list        List the video URLs on a profile
+                  index       List downloaded posts in a directory
+      youtube     auth        Log in to YouTube
+                  schedule    Build an upload batch from downloaded posts
+                  upload      Upload and schedule a batch
+                  update-descriptions
+                              Push edited descriptions to uploaded videos
+                  shorts      List the titles of a channel's newest Shorts
 
-      Options:
-          -v, --version           Print the version
-          -h, --help              Show this help message
+  Options:
+      -v, --version           Print the version
+      -h, --help              Show this help message
 
-      Run `subetha PLATFORM --help` for a platform's commands and options.
-    USAGE
+  Run `subetha PLATFORM --help` for a platform's commands and options.
+USAGE
 
     def self.start(argv)
       argv = argv.dup

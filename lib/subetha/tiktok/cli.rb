@@ -11,6 +11,8 @@ module Subetha
         Commands:
             download URL [URL...]   Download videos and photo posts
             list PROFILE_URL...     Print the video URLs on a profile to stdout
+            index [DIR]             Print "date | id | caption" for each downloaded post,
+                                    newest first (default: the output directory)
 
         Download options:
             --output-dir DIR        Directory to save files (default: current directory)
@@ -38,7 +40,7 @@ module Subetha
             subetha tiktok list https://www.tiktok.com/@user | xargs subetha tiktok download
       USAGE
 
-      COMMANDS = %w[download list].freeze
+      COMMANDS = %w[download list index].freeze
 
       def self.start(argv)
         new.start(argv)
@@ -62,12 +64,14 @@ module Subetha
         options = parse_options(argv)
         return 0 if options.nil?
 
+        config = Config.load(options)
+        return index(argv.first || config.output_dir) if command == "index"
+
         if argv.empty?
           $stderr.puts USAGE
           return 1
         end
 
-        config = Config.load(options)
         command == "list" ? list(argv, config) : download(argv, config)
       rescue OptionParser::ParseError => e
         $stderr.puts "#{e.message}\n\n#{USAGE}"
@@ -120,6 +124,27 @@ module Subetha
           $stderr.puts "  Total: #{video_urls.size} video(s)".green
           video_urls.each { |u| $stdout.puts u }
         end
+      end
+
+      def index(dir)
+        unless File.directory?(dir)
+          $stderr.puts "Not a directory: #{dir}".red
+          return 1
+        end
+
+        # A .json sidecar only counts when there is no .txt for the same post.
+        paths = Dir[File.join(dir, "*.{txt,json}")].sort
+        paths = paths.reject { |p| p.end_with?(".json") && paths.include?(p.sub(/\.json\z/, ".txt")) }
+        rows  = paths.filter_map do |path|
+          sidecar = Sidecar.new(path)
+          next if sidecar.video_id.to_s.empty?
+
+          [sidecar.date.to_s, sidecar.video_id, sidecar.title.tr("\n", " ")[0, 80]]
+        rescue JSON::ParserError
+          nil
+        end
+        rows.sort.reverse_each { |row| $stdout.puts row.join(" | ") }
+        0
       end
 
       # Runs the block for each URL, pausing between requests, and collects

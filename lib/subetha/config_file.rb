@@ -1,6 +1,13 @@
 require "yaml"
 
 module Subetha
+  # Directory for subetha's own state (credentials, tokens), following XDG.
+  def self.config_dir
+    base = ENV["XDG_CONFIG_HOME"].to_s
+    base = File.expand_path("~/.config") if base.empty?
+    File.join(base, "subetha")
+  end
+
   # Reads the user's .subetha.yml. Each platform keeps its settings under its
   # own top-level key (e.g. "tiktok:"), so one file can configure them all.
   # The file in the current directory takes precedence over the one in $HOME.
