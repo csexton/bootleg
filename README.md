@@ -1,14 +1,10 @@
-# Sub-Etha
-
-> "where it would be broadcast out over the Sub-Etha-Net for instantaneous retrieval anywhere in the Galaxy."
-
-― Douglas Adams, *Mostly Harmless*
+# Bootleg
 
 A command-line utility for downloading, archiving, and publishing videos across social media platforms.
 
 ## About
 
-Sub-Etha keeps a local archive of your videos and makes it easy to distribute them across multiple platforms without relying on any one service.
+Bootleg keeps a local archive of your videos and makes it easy to distribute them across multiple platforms without relying on any one service.
 
 Download once. Archive forever. Publish anywhere.
 
@@ -19,16 +15,16 @@ Don't Panic.
 Requires Ruby 3.0+.
 
 ```bash
-git clone https://github.com/csexton/subetha.git && cd subetha
+git clone https://github.com/csexton/bootleg.git && cd bootleg
 bin/setup                 # bundle install
-bundle exec exe/subetha --help
+bundle exec exe/bootleg --help
 ```
 
 Or build and install the gem locally:
 
 ```bash
 bundle exec rake install
-subetha --help
+bootleg --help
 ```
 
 ## Usage
@@ -36,7 +32,7 @@ subetha --help
 Commands are grouped by platform:
 
 ```
-subetha PLATFORM COMMAND [options]
+bootleg PLATFORM COMMAND [options]
 ```
 
 | Platform  | Command               | Description                                         |
@@ -50,7 +46,7 @@ subetha PLATFORM COMMAND [options]
 | `youtube` | `update-descriptions` | Push edited descriptions to already-uploaded videos |
 | `youtube` | `shorts`              | List the titles of a channel's newest Shorts        |
 
-Run `subetha PLATFORM --help` for each platform's options. More platforms
+Run `bootleg PLATFORM --help` for each platform's options. More platforms
 (Instagram and others) will follow the same shape.
 
 ## TikTok
@@ -60,28 +56,28 @@ sidecar for each post.
 
 ```bash
 # Download a video to the current directory
-subetha tiktok download https://www.tiktok.com/@someuser/video/1234567890
+bootleg tiktok download https://www.tiktok.com/@someuser/video/1234567890
 
 # Specify an output directory
-subetha tiktok download --output-dir ~/Videos/tiktok https://www.tiktok.com/@someuser/video/1234567890
+bootleg tiktok download --output-dir ~/Videos/tiktok https://www.tiktok.com/@someuser/video/1234567890
 
 # Save sidecar as JSON instead of plain text
-subetha tiktok download --json https://www.tiktok.com/@someuser/video/1234567890
+bootleg tiktok download --json https://www.tiktok.com/@someuser/video/1234567890
 
 # Download multiple URLs
-subetha tiktok download URL1 URL2 URL3
+bootleg tiktok download URL1 URL2 URL3
 
 # List video URLs for a profile (URLs to stdout, status to stderr)
-subetha tiktok list https://www.tiktok.com/@someuser
+bootleg tiktok list https://www.tiktok.com/@someuser
 
 # Fetch more pages of a profile
-subetha tiktok list --pages 3 https://www.tiktok.com/@someuser
+bootleg tiktok list --pages 3 https://www.tiktok.com/@someuser
 
 # Archive a whole profile
-subetha tiktok list --pages 10 https://www.tiktok.com/@someuser | xargs subetha tiktok download
+bootleg tiktok list --pages 10 https://www.tiktok.com/@someuser | xargs bootleg tiktok download
 
 # What's already downloaded: "date | video id | caption", newest first
-subetha tiktok index ~/Videos/tiktok
+bootleg tiktok index ~/Videos/tiktok
 ```
 
 The output directory is created automatically if it doesn't exist.
@@ -164,17 +160,17 @@ any schedule of videos works.
    Google account as a test user. ("Internal" only works for Workspace
    accounts in the same organization.)
 3. Create an OAuth client ID of type **Desktop app**, download its JSON, and
-   save it as `~/.config/subetha/youtube/client_secrets.json` (or point
+   save it as `~/.config/bootleg/youtube/client_secrets.json` (or point
    `youtube.client_secrets` at it).
 4. Log in with the account that owns the channel:
 
    ```bash
-   subetha youtube auth
+   bootleg youtube auth
    ```
 
-   The token is saved to `~/.config/subetha/youtube/token.json`. While the
+   The token is saved to `~/.config/bootleg/youtube/token.json`. While the
    OAuth app is in *Testing* mode Google expires the login after 7 days; when
-   commands say the login expired, run `subetha youtube auth` again.
+   commands say the login expired, run `bootleg youtube auth` again.
 
 ### A batch
 
@@ -191,13 +187,13 @@ to publish, with the YouTube title for each:
 ~/Videos/tiktok/someuser-2026-11-08-inlay-dovetails-pt-2-cleaning-up      | Inlay Dovetails Pt. 2
 ```
 
-`subetha tiktok index DIR` and `subetha youtube shorts @handle` help find what's
+`bootleg tiktok index DIR` and `bootleg youtube shorts @handle` help find what's
 on TikTok but not yet on YouTube.
 
 **2. Build the schedule**, one video per day starting on `--start`:
 
 ```bash
-subetha youtube schedule picks.txt --start 2026-12-01 --time 19:00 --dir batches/2026-12
+bootleg youtube schedule picks.txt --start 2026-12-01 --time 19:00 --dir batches/2026-12
 ```
 
 This copies each video into `batches/2026-12/videos/` and writes
@@ -218,8 +214,8 @@ before uploading.
 **3. Upload:**
 
 ```bash
-subetha youtube upload batches/2026-12 --dry-run   # check every row, upload nothing
-subetha youtube upload batches/2026-12
+bootleg youtube upload batches/2026-12 --dry-run   # check every row, upload nothing
+bootleg youtube upload batches/2026-12
 ```
 
 Videos already in `uploads.json` are skipped, so re-running is safe. Uploads
@@ -231,8 +227,8 @@ time.
 **4. Fixing descriptions later.** Edit `schedule.csv`, then:
 
 ```bash
-subetha youtube update-descriptions batches/2026-12 --dry-run
-subetha youtube update-descriptions batches/2026-12
+bootleg youtube update-descriptions batches/2026-12 --dry-run
+bootleg youtube update-descriptions batches/2026-12
 ```
 
 Only the description changes; title, tags and schedule are left alone.
@@ -266,8 +262,8 @@ Defaults live in a YAML file, with one top-level key per platform. The file in
 the current directory takes precedence over the one in your home directory, and
 command-line flags override both.
 
-- `~/.subetha.yml` — user-wide defaults
-- `./.subetha.yml` — per-project override
+- `~/.bootleg.yml` — user-wide defaults
+- `./.bootleg.yml` — per-project override
 
 ```yaml
 tiktok:
@@ -288,8 +284,8 @@ youtube:
   default_tags: [woodworking, handtools]  # used when a caption has no hashtags
   delay: 45                         # seconds between uploads
   handle: "@someuser"               # default channel for `youtube shorts`
-  # client_secrets: ~/.config/subetha/youtube/client_secrets.json
-  # token_path: ~/.config/subetha/youtube/token.json
+  # client_secrets: ~/.config/bootleg/youtube/client_secrets.json
+  # token_path: ~/.config/bootleg/youtube/token.json
 ```
 
 ## Development
@@ -297,7 +293,7 @@ youtube:
 ```bash
 bin/setup            # install dependencies
 bundle exec rake     # run the specs
-bin/console          # IRB with subetha loaded
+bin/console          # IRB with bootleg loaded
 ```
 
 Specs never touch the network; the HTTP layer is always stubbed.

@@ -3,7 +3,7 @@ $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
 require "fileutils"
 require "stringio"
 require "tmpdir"
-require "subetha"
+require "bootleg"
 
 # Helpers shared by the specs. Everything here stays offline: no spec may make
 # a network request, so the HTTP layer is always stubbed out.
@@ -19,7 +19,7 @@ module SpecHelpers
 
   # An output directory that is removed after the example.
   def output_dir
-    @output_dir ||= Dir.mktmpdir("subetha-spec")
+    @output_dir ||= Dir.mktmpdir("bootleg-spec")
   end
 
   def cleanup_output_dir
@@ -27,7 +27,7 @@ module SpecHelpers
   end
 
   def config(**overrides)
-    Subetha::Tiktok::Config.new(**DEFAULT_CONFIG, output_dir: output_dir, **overrides)
+    Bootleg::Tiktok::Config.new(**DEFAULT_CONFIG, output_dir: output_dir, **overrides)
   end
 
   def files_in_output
@@ -77,14 +77,14 @@ end
 
 def http_response(code, body = "", headers = {})
   body = JSON.generate(body) unless body.is_a?(String)
-  Subetha::Youtube::Response.new(code, headers.transform_keys(&:downcase), body)
+  Bootleg::Youtube::Response.new(code, headers.transform_keys(&:downcase), body)
 end
 
 RSpec.configure do |config|
   config.include SpecHelpers
   config.after { cleanup_output_dir }
-  # Never read the real ~/.subetha.yml.
-  config.before { allow(Subetha::ConfigFile).to receive(:candidates).and_return([]) }
+  # Never read the real ~/.bootleg.yml.
+  config.before { allow(Bootleg::ConfigFile).to receive(:candidates).and_return([]) }
 
   config.around do |example|
     real_stdout = $stdout
