@@ -15,8 +15,8 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = ">= 3.0"
 
-  spec.files         = Dir["lib/**/*.rb", "exe/*"] + %w[README.md LICENSE]
-  spec.bindir        = "exe"
+  spec.files         = Dir["lib/**/*.rb"] + %w[bin/bootleg README.md LICENSE]
+  spec.bindir        = "bin"
   spec.executables   = ["bootleg"]
   spec.require_paths = ["lib"]
 

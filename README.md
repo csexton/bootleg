@@ -6,9 +6,9 @@ A command-line utility for downloading, archiving, and publishing videos across 
 
 Bootleg keeps a local archive of your videos and makes it easy to distribute them across multiple platforms without relying on any one service.
 
-Download once. Archive forever. Publish anywhere.
+> "Can't stop the signal, Mal."
 
-Don't Panic.
+― Mr. Universe, Serenity (2005)
 
 ## Installation
 
@@ -17,7 +17,7 @@ Requires Ruby 3.0+.
 ```bash
 git clone https://github.com/csexton/bootleg.git && cd bootleg
 bin/setup                 # bundle install
-bundle exec exe/bootleg --help
+bin/bootleg --help
 ```
 
 Or build and install it as a local gem (named `bootleg-cli`; it is not published to RubyGems):

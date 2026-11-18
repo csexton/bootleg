@@ -1,5 +1,0 @@
-#!/usr/bin/env ruby
-
-require "bootleg"
-
-exit Bootleg::CLI.start(ARGV)
