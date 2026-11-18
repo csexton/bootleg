@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    bootleg (0.1.0)
+    bootleg-cli (0.1.0)
       colorize
       csv
       nokogiri
@@ -59,7 +59,7 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
-  bootleg!
+  bootleg-cli!
   rake (~> 13.0)
   rspec (~> 3.13)
 

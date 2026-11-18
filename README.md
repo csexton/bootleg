@@ -20,7 +20,7 @@ bin/setup                 # bundle install
 bundle exec exe/bootleg --help
 ```
 
-Or build and install the gem locally:
+Or build and install it as a local gem (named `bootleg-cli`; it is not published to RubyGems):
 
 ```bash
 bundle exec rake install

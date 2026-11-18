@@ -1,7 +1,7 @@
 require_relative "lib/bootleg/version"
 
 Gem::Specification.new do |spec|
-  spec.name    = "bootleg"
+  spec.name    = "bootleg-cli"
   spec.version = Bootleg::VERSION
   spec.authors = ["Christopher Sexton"]
   spec.license = "MIT"
