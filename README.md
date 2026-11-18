@@ -12,7 +12,7 @@ Bootleg keeps a local archive of your videos and makes it easy to distribute the
 
 ## Installation
 
-Requires Ruby 3.0+.
+Requires Ruby 3.0+. Bootleg runs straight from a checkout:
 
 ```bash
 git clone https://github.com/csexton/bootleg.git && cd bootleg
@@ -20,11 +20,19 @@ bin/setup                 # bundle install
 bin/bootleg --help
 ```
 
-Or build and install it as a local gem (named `bootleg-cli`; it is not published to RubyGems):
+`bin/bootleg` loads the repo's own Gemfile, so it doesn't need `bundle exec`
+and works from any directory. The examples below call plain `bootleg`. To run
+them as written, put the checkout's `bin/` on your `PATH`, e.g. in `~/.zshrc`:
+
+```bash
+export PATH="$HOME/src/bootleg/bin:$PATH"
+```
+
+Bootleg isn't published to RubyGems. If you'd rather install it as a gem
+(named `bootleg-cli`), build it from the checkout:
 
 ```bash
 bundle exec rake install
-bootleg --help
 ```
 
 ## Usage
@@ -48,6 +56,24 @@ bootleg PLATFORM COMMAND [options]
 
 Run `bootleg PLATFORM --help` for each platform's options. More platforms
 (Instagram and others) will follow the same shape.
+
+### TikTok to YouTube, end to end
+
+```bash
+# 1. Archive new posts (settings in ~/.bootleg.yml, see Configuration)
+bootleg tiktok list https://www.tiktok.com/@someuser | xargs bootleg tiktok download
+
+# 2. Compare what's archived with what's already on YouTube
+bootleg tiktok index ~/Videos/tiktok | head -20
+bootleg youtube shorts @someuser
+
+# 3. List the ones to cross-post in picks.txt, then build and upload a batch
+bootleg youtube schedule picks.txt --start 2026-12-01 --dir batches/2026-12
+bootleg youtube upload batches/2026-12 --dry-run
+bootleg youtube upload batches/2026-12
+```
+
+Each step is covered in more detail below.
 
 ## TikTok
 
@@ -77,10 +103,12 @@ bootleg tiktok list --pages 3 https://www.tiktok.com/@someuser
 bootleg tiktok list --pages 10 https://www.tiktok.com/@someuser | xargs bootleg tiktok download
 
 # What's already downloaded: "date | video id | caption", newest first
+# (defaults to the configured output_dir)
 bootleg tiktok index ~/Videos/tiktok
 ```
 
-The output directory is created automatically if it doesn't exist.
+The output directory is created automatically if it doesn't exist. `download`
+takes only video and photo URLs; pass profile URLs to `list`.
 
 ### Output
 
@@ -161,7 +189,12 @@ any schedule of videos works.
    accounts in the same organization.)
 3. Create an OAuth client ID of type **Desktop app**, download its JSON, and
    save it as `~/.config/bootleg/youtube/client_secrets.json` (or point
-   `youtube.client_secrets` at it).
+   `youtube.client_secrets` at it):
+
+   ```bash
+   mkdir -p ~/.config/bootleg/youtube
+   mv ~/Downloads/client_secret_*.json ~/.config/bootleg/youtube/client_secrets.json
+   ```
 4. Log in with the account that owns the channel:
 
    ```bash
@@ -294,9 +327,16 @@ youtube:
 bin/setup            # install dependencies
 bundle exec rake     # run the specs
 bin/console          # IRB with bootleg loaded
+bin/bootleg ...      # run the CLI from the checkout
 ```
 
 Specs never touch the network; the HTTP layer is always stubbed.
+
+Each platform lives in its own namespace under `lib/bootleg/` (`Bootleg::Tiktok`,
+`Bootleg::Youtube`) with a `CLI` class for its commands. To add a platform,
+create `lib/bootleg/<platform>.rb` and its `CLI`, then register it in
+`Bootleg::CLI::PLATFORMS`. Its settings go under its own key in `.bootleg.yml`,
+read with `Bootleg::ConfigFile.section("<platform>")`.
 
 ## Credits
 
